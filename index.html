@@ -13,11 +13,7 @@
         icon: 'https://trello-subtask-manager.netlify.app/logo.png',
         text: 'Open Subtasks',
         callback: function (t) {
-          return t.popup({
-            title: 'Subtasks',
-            url: './subtasks.html',
-            height: 300
-          });
+          return t.card().then(card => alert('Hello World!'))
         }
       }];
     }
