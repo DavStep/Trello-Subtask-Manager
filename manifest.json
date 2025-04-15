@@ -1,19 +1,22 @@
 {
   "name": "Subtasks Manager",
-  "id": "subtasks-manager",
-  "description": "Manage subtasks via linked cards.",
-  "author": "you",
-  "capabilities": {
-    "card-buttons": [
-      {
-        "text": "Open Subtasks",
-        "callback": "openSubtasks"
-      }
-    ]
+  "id": "67fe7bc43a9749495426be02",
+  "author": "Davit Stepanyan",
+  "icon": {
+    "url": "https://trello-subtask-manager.netlify.app/logo.png",
+    "url2x": "https://trello-subtask-manager.netlify.app/logo.png"
   },
-  "connectors": {
-    "iframe": {
-      "url": "./"
+  "capabilities": {
+    "card-buttons": {
+      "url": "https://trello-subtask-manager.netlify.app/index.html"
+    },
+    "show-settings": {
+      "url": "https://trello-subtask-manager.netlify.app/settings.html"
     }
-  }
+  },
+  "connectors": {},
+  "authorization": {
+    "type": "none"
+  },
+  "version": "1.0"
 }
