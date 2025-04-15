@@ -11,15 +11,36 @@
     'card-buttons': function (t, options) {
       return [{
         icon: 'https://trello-subtask-manager.netlify.app/logo.png',
-        text: 'Open Subtasks',
+        text: 'Add Subtask',
         callback: function (t) {
           return t.popup({
-            title: 'Subtasks',
-            url: './subtasks.html',
-            height: 300
+            title: 'Add Subtask',
+            url: 'subtask-picker.html',
+            height: 100
           });
         }
       }];
+    },
+    'card-detail-badges': function (t, options) {
+      return t.get('card', 'shared', 'subtasks', [])
+        .then(function (subtasks) {
+          if (!subtasks.length) return [];
+
+          return [{
+            title: 'Subtasks',
+            text: `${subtasks.length} linked`,
+            color: 'blue',
+            callback: function (t) {
+              return t.popup({
+                title: 'Subtasks',
+                items: subtasks.map(url => ({
+                  text: url,
+                  url: url
+                }))
+              });
+            }
+          }];
+        });
     }
   });
 </script>

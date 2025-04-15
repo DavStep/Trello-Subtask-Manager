@@ -1,0 +1,24 @@
+{
+  "name": "Subtask Manager",
+  "capabilities": {
+    "card-buttons": [
+      {
+        "text": "Add Subtask",
+        "callback": "onAddSubtask"
+      }
+    ],
+    "card-detail-badges": [
+      {
+        "title": "Subtasks",
+        "callback": "renderSubtasks"
+      }
+    ]
+  },
+  "connectors": {
+    "iframe": {
+      "url": "https://trello-subtask-manager.netlify.app",
+      "height": 200
+    }
+  },
+  "authorization": { "type": "none" }
+}
