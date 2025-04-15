@@ -7,7 +7,7 @@
 </head>
 <body>
 <script>
-  window.TrelloPowerUp.initialize({
+  TrelloPowerUp.initialize({
     'card-buttons': function (t, options) {
       return [{
         icon: 'https://trello-subtask-manager.netlify.app/logo.png',
@@ -15,7 +15,7 @@
         callback: function (t) {
           return t.popup({
             title: 'Subtasks',
-            url: './subtasks.html', // put the UI here
+            url: './subtasks.html',
             height: 300
           });
         }
