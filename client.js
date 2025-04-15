@@ -1,7 +1,7 @@
 window.TrelloPowerUp.initialize({
   'card-buttons': function (t) {
     return [{
-     icon: 'https://trello-subtask-manager.netlify.app/logo.png',
+      icon: 'https://trello-subtask-manager.netlify.app/logo.png',
       text: 'Add Subtask',
       callback: function (t) {
         return t.popup({
@@ -13,15 +13,15 @@ window.TrelloPowerUp.initialize({
     }];
   },
 
-  'card-detail-sections': function (t) {
-    return [{
+  'card-back-section': function (t) {
+    return {
       title: 'Subtasks',
       icon: 'https://trello-subtask-manager.netlify.app/logo.png',
       content: {
         type: 'iframe',
         url: t.signUrl('subtask-section.html'),
-        height: 150
+        height: 180
       }
-    }];
+    };
   }
 });

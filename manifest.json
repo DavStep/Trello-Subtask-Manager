@@ -1,5 +1,7 @@
 {
   "name": "Subtask Manager",
+  "description": "Link and view subtasks between Trello cards.",
+  "author": "your name or org",
   "capabilities": {
     "card-buttons": [
       {
@@ -10,29 +12,29 @@
     "card-detail-badges": [
       {
         "title": "Subtasks",
-        "callback": "renderSubtasks"
+        "callback": "renderSubtasksBadge"
       }
     ],
-    "card-detail-sections": [
-      {
-        "section": "subtask-section",
-        "claimed": true,
-        "title": "Subtasks",
-        "icon": "https://trello-subtask-manager.netlify.app/logo.png",
-        "content": {
-          "type": "iframe",
-          "url": "subtask-section.html",
-          "height": 150
-        }
+    "card-back-section": {
+      "title": "Subtasks",
+      "icon": "https://trello-subtask-manager.netlify.app/logo.png",
+      "content": {
+        "type": "iframe",
+        "url": "subtask-section.html",
+        "height": 180
       }
-    ]
-  },
-  "connectors": {
-    "iframe": {
-      "url": "https://trello-subtask-manager.netlify.app"
     }
+  },
+  "icon": {
+    "url": "https://trello-subtask-manager.netlify.app/logo.png"
   },
   "authorization": {
     "type": "none"
+  },
+  "connectors": {
+    "iframe": {
+      "url": "https://trello-subtask-manager.netlify.app",
+      "height": 200
+    }
   }
 }
