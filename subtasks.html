@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Subtasks</title>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+    }
+    button {
+      margin: 5px 0;
+    }
+    .subtask {
+      margin: 5px 0;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    input[type='text'] {
+      flex: 1;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+<h3>Subtasks</h3>
+<div id="subtasks"></div>
+<input id="subtaskTitle" type="text" placeholder="New subtask title">
+<button id="createSubtask">+ Add Subtask</button>
+
+<script>
+  const t = TrelloPowerUp.iframe();
+
+  async function renderSubtasks () {
+    const subtasks = await t.get('card', 'shared', 'subtasks', []);
+    const container = document.getElementById('subtasks');
+    container.innerHTML = '';
+
+    subtasks.forEach(({ name, url, done }, index) => {
+      const div = document.createElement('div');
+      div.className = 'subtask';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = done;
+      checkbox.onchange = () => toggleDone(index);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.textContent = name;
+
+      div.appendChild(checkbox);
+      div.appendChild(link);
+      container.appendChild(div);
+    });
+  }
+
+  async function toggleDone (index) {
+    const subtasks = await t.get('card', 'shared', 'subtasks', []);
+    subtasks[index].done = !subtasks[index].done;
+    await t.set('card', 'shared', 'subtasks', subtasks);
+    renderSubtasks();
+  }
+
+  document.getElementById('createSubtask').onclick = async () => {
+    const title = document.getElementById('subtaskTitle').value.trim();
+    if (!title) return;
+
+    const newSubtask = { name: title, url: '#', done: false };
+    const subtasks = await t.get('card', 'shared', 'subtasks', []);
+    subtasks.push(newSubtask);
+    await t.set('card', 'shared', 'subtasks', subtasks);
+    document.getElementById('subtaskTitle').value = '';
+    renderSubtasks();
+  };
+
+  t.render(renderSubtasks);
+</script>
+</body>
+</html>
