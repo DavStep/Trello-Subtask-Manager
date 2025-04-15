@@ -12,7 +12,18 @@
         "title": "Subtasks",
         "callback": "renderSubtasks"
       }
-    ]
+    ],
+    "card-detail-section": {
+      "section": "subtask-section",
+      "claimed": true,
+      "title": "Subtasks",
+      "icon": "https://your-site.com/icon.png",
+      "content": {
+        "type": "iframe",
+        "url": "subtask-section.html",
+        "height": 150
+      }
+    }
   },
   "connectors": {
     "iframe": {
