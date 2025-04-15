@@ -5,25 +5,22 @@
   <title>Trello Subtasks Power-Up</title>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
   <style>
-      body {
-          font-family: sans-serif;
-          padding: 10px;
-      }
-
-      button {
-          margin: 5px 0;
-      }
-
-      .subtask {
-          margin: 5px 0;
-          display: flex;
-          gap: 5px;
-          align-items: center;
-      }
-
-      input[type='text'] {
-          padding: 5px;
-      }
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+    }
+    button {
+      margin: 5px 0;
+    }
+    .subtask {
+      margin: 5px 0;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    input[type='text'] {
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +37,7 @@
     const container = document.getElementById('subtasks');
     container.innerHTML = '';
 
-    subtasks.forEach(({name, url, done}, index) => {
+    subtasks.forEach(({ name, url, done }, index) => {
       const div = document.createElement('div');
       div.className = 'subtask';
 
@@ -71,11 +68,8 @@
     const title = document.getElementById('subtaskTitle').value.trim();
     if (!title) return;
 
-    const board = await t.board('id');
-    const url = `https://trello.com/add-card?mode=popup&name=${encodeURIComponent(title)}&idList=${board.id}&keepFromSource=all`;
-    window.open(url, '_blank');
-
-    const newSubtask = {name: title, url: 'https://trello.com', done: false};
+    // Just add it locally, no real Trello card created
+    const newSubtask = { name: title, url: '#', done: false };
     const subtasks = await t.get('card', 'shared', 'subtasks', []);
     subtasks.push(newSubtask);
     await t.set('card', 'shared', 'subtasks', subtasks);
