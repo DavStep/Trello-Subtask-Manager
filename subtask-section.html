@@ -1,83 +1,191 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>Subtasks</title>
-  <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
-  <script src="https://p.trellocdn.com/power-up.min.js"></script>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 16px;">
-
-  <h3 style="margin-top: 0; font-size: 16px;">Linked Subtasks</h3>
-
-  <ul id="subtask-list" style="list-style: none; padding-left: 0; margin-bottom: 16px;"></ul>
-
-  <div style="display: flex; gap: 8px;">
-    <input
-      type="url"
-      id="subtask-url"
-      class="mod-input"
-      placeholder="Paste Trello card URL"
-      style="flex-grow: 1; padding: 6px 8px;"
-    />
-    <button
-      class="mod-primary"
-      style="padding: 6px 12px;"
-      onclick="addSubtask()"
-    >
-      Add
-    </button>
-  </div>
-
-  <script>
-    const t = TrelloPowerUp.iframe();
-    const list = document.getElementById('subtask-list');
-
-    function renderSubtasks (urls) {
-      list.innerHTML = '';
-      if (!urls.length) {
-        list.innerHTML = `<li style="color: #888;">No subtasks yet.</li>`;
-        return;
+  <head>
+    <meta charset="utf-8" />
+    <title>Subtasks</title>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css" />
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 16px;
+        color: #172b4d;
       }
 
-      urls.forEach(url => {
-        const li = document.createElement('li');
-        li.style.marginBottom = '8px';
+      h3 {
+        margin-top: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #5e6c84;
+      }
 
-        const link = document.createElement('a');
-        link.href = url;
-        link.target = '_blank';
-        link.textContent = formatCardTitle(url);
-        link.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
-        link.onmouseover = () => link.style.textDecoration = 'underline';
-        link.onmouseout = () => link.style.textDecoration = 'none';
+      .subtask-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 16px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
 
-        li.appendChild(link);
-        list.appendChild(li);
-      });
-    }
+      .subtask-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        border-radius: 4px;
+        background-color: #f4f5f7;
+        transition: background 0.2s ease;
+      }
 
-    function formatCardTitle (url) {
-      const parts = url.split('/');
-      const id = parts[parts.length - 1] || parts[parts.length - 2];
-      return `Card ${id}`;
-    }
+      .subtask-item:hover {
+        background-color: #ebecf0;
+      }
 
-    function addSubtask () {
-      const input = document.getElementById('subtask-url');
-      const url = input.value.trim();
-      if (!url) return;
+      .subtask-title {
+        color: #0079bf;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        flex-grow: 1;
+        margin-right: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
-      t.get('card', 'shared', 'subtasks', []).then(existing => {
-        const updated = [...existing, url];
-        return t.set('card', 'shared', 'subtasks', updated);
-      }).then(() => {
-        input.value = '';
-        return t.get('card', 'shared', 'subtasks', []);
-      }).then(renderSubtasks);
-    }
+      .subtask-title:hover {
+        text-decoration: underline;
+      }
 
-    t.get('card', 'shared', 'subtasks', []).then(renderSubtasks);
-  </script>
-</body>
+      .remove-btn {
+        border: none;
+        background: none;
+        color: #b04632;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .mod-input {
+        flex-grow: 1;
+        padding: 6px 8px;
+        font-size: 14px;
+      }
+
+      .mod-primary {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+
+      .empty-note {
+        color: #6b778c;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Linked Subtasks</h3>
+
+    <ul id="subtask-list" class="subtask-list"></ul>
+
+    <div class="input-row">
+      <input
+        type="url"
+        id="subtask-url"
+        class="mod-input"
+        placeholder="Paste Trello card URL"
+      />
+      <button class="mod-primary" onclick="addSubtask()">Add</button>
+    </div>
+
+    <script>
+      const t = TrelloPowerUp.iframe();
+      const list = document.getElementById('subtask-list');
+
+      async function fetchCardTitle(url) {
+        try {
+          const shortLink = extractShortLink(url);
+          const res = await fetch(`https://trello.com/1/cards/${shortLink}`);
+          const data = await res.json();
+          return data.name || `Card ${shortLink}`;
+        } catch {
+          return `Card ${extractShortLink(url)}`;
+        }
+      }
+
+      function extractShortLink(url) {
+        const match = url.match(/trello\.com\/c\/([a-zA-Z0-9]+)/);
+        return match ? match[1] : '';
+      }
+
+      async function renderSubtasks(urls) {
+        list.innerHTML = '';
+        if (!urls.length) {
+          list.innerHTML = `<li class="empty-note">No subtasks linked yet.</li>`;
+          return;
+        }
+
+        for (let i = 0; i < urls.length; i++) {
+          const url = urls[i];
+          const title = await fetchCardTitle(url);
+
+          const li = document.createElement('li');
+          li.className = 'subtask-item';
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.className = 'subtask-title';
+          link.textContent = title;
+
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = '✕';
+          removeBtn.className = 'remove-btn';
+          removeBtn.title = 'Remove';
+          removeBtn.onclick = () => removeSubtask(i);
+
+          li.appendChild(link);
+          li.appendChild(removeBtn);
+          list.appendChild(li);
+        }
+      }
+
+      function addSubtask() {
+        const input = document.getElementById('subtask-url');
+        const url = input.value.trim();
+        if (!url) return;
+
+        t.get('card', 'shared', 'subtasks', [])
+          .then(subtasks => {
+            if (!subtasks.includes(url)) {
+              subtasks.push(url);
+            }
+            return t.set('card', 'shared', 'subtasks', subtasks);
+          })
+          .then(() => {
+            input.value = '';
+            return t.get('card', 'shared', 'subtasks', []);
+          })
+          .then(renderSubtasks);
+      }
+
+      function removeSubtask(index) {
+        t.get('card', 'shared', 'subtasks', [])
+          .then(subtasks => {
+            subtasks.splice(index, 1);
+            return t.set('card', 'shared', 'subtasks', subtasks);
+          })
+          .then(() => t.get('card', 'shared', 'subtasks', []))
+          .then(renderSubtasks);
+      }
+
+      t.get('card', 'shared', 'subtasks', []).then(renderSubtasks);
+    </script>
+  </body>
 </html>
