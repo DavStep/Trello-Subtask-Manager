@@ -6,45 +6,78 @@
   <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
-<body style="margin: 16px; font-family: 'Helvetica Neue', Arial, sans-serif;">
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 16px;">
 
-  <h3 style="margin-top: 0;">Linked Subtasks</h3>
+  <h3 style="margin-top: 0; font-size: 16px;">Linked Subtasks</h3>
 
-  <ul id="subtask-list" style="list-style-type: none; padding-left: 0; margin-top: 8px;"></ul>
+  <ul id="subtask-list" style="list-style: none; padding-left: 0; margin-bottom: 16px;"></ul>
+
+  <div style="display: flex; gap: 8px;">
+    <input
+      type="url"
+      id="subtask-url"
+      class="mod-input"
+      placeholder="Paste Trello card URL"
+      style="flex-grow: 1; padding: 6px 8px;"
+    />
+    <button
+      class="mod-primary"
+      style="padding: 6px 12px;"
+      onclick="addSubtask()"
+    >
+      Add
+    </button>
+  </div>
 
   <script>
     const t = TrelloPowerUp.iframe();
     const list = document.getElementById('subtask-list');
 
-    t.get('card', 'shared', 'subtasks', []).then(urls => {
+    function renderSubtasks (urls) {
+      list.innerHTML = '';
       if (!urls.length) {
-        list.innerHTML = `<li style="color: #888;">No subtasks linked yet.</li>`;
+        list.innerHTML = `<li style="color: #888;">No subtasks yet.</li>`;
         return;
       }
 
       urls.forEach(url => {
         const li = document.createElement('li');
-        li.style = 'margin-bottom: 8px;';
+        li.style.marginBottom = '8px';
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.textContent = getPrettyTitleFromURL(url);
-        a.target = '_blank';
-        a.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.textContent = formatCardTitle(url);
+        link.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
+        link.onmouseover = () => link.style.textDecoration = 'underline';
+        link.onmouseout = () => link.style.textDecoration = 'none';
 
-        a.onmouseover = () => a.style.textDecoration = 'underline';
-        a.onmouseout = () => a.style.textDecoration = 'none';
-
-        li.appendChild(a);
+        li.appendChild(link);
         list.appendChild(li);
       });
-    });
-
-    // fallback name until card name fetching is implemented
-    function getPrettyTitleFromURL (url) {
-      const parts = url.split('/');
-      return `Card ${parts[parts.length - 1]}`;
     }
+
+    function formatCardTitle (url) {
+      const parts = url.split('/');
+      const id = parts[parts.length - 1] || parts[parts.length - 2];
+      return `Card ${id}`;
+    }
+
+    function addSubtask () {
+      const input = document.getElementById('subtask-url');
+      const url = input.value.trim();
+      if (!url) return;
+
+      t.get('card', 'shared', 'subtasks', []).then(existing => {
+        const updated = [...existing, url];
+        return t.set('card', 'shared', 'subtasks', updated);
+      }).then(() => {
+        input.value = '';
+        return t.get('card', 'shared', 'subtasks', []);
+      }).then(renderSubtasks);
+    }
+
+    t.get('card', 'shared', 'subtasks', []).then(renderSubtasks);
   </script>
 </body>
 </html>

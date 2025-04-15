@@ -1,26 +1,104 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <title>Add Subtasks</title>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css" />
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
   </head>
-  <body style="margin: 10px;">
-    <input type="url" id="subtask-url" placeholder="Paste Trello card URL" style="width:100%; margin-bottom:8px;" />
-    <button onclick="saveSubtask()" style="width:100%;">Save Subtask</button>
+  <body style="margin: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+    <h3 style="margin-top: 0;">Manage Subtasks</h3>
+
+    <ul id="subtask-list" style="list-style: none; padding-left: 0; margin-bottom: 16px;"></ul>
+
+    <div style="display: flex; gap: 8px;">
+      <input
+        type="url"
+        id="subtask-url"
+        class="mod-input"
+        placeholder="Paste Trello card URL"
+        style="flex-grow: 1; padding: 6px 8px;"
+      />
+      <button
+        class="mod-primary"
+        onclick="addSubtask()"
+        style="padding: 6px 12px;"
+      >
+        Add
+      </button>
+    </div>
 
     <script>
       const t = TrelloPowerUp.iframe();
+      const list = document.getElementById('subtask-list');
 
-      function saveSubtask () {
-        const url = document.getElementById('subtask-url').value.trim();
+      function renderSubtasks (urls) {
+        list.innerHTML = '';
+        if (!urls.length) {
+          list.innerHTML = '<li style="color: #888;">No subtasks linked.</li>';
+          return;
+        }
+
+        urls.forEach((url, index) => {
+          const li = document.createElement('li');
+          li.style = 'display: flex; align-items: center; margin-bottom: 8px; gap: 8px;';
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.textContent = getCardLabel(url);
+          link.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
+          link.onmouseover = () => link.style.textDecoration = 'underline';
+          link.onmouseout = () => link.style.textDecoration = 'none';
+
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = '✕';
+          removeBtn.title = 'Remove';
+          removeBtn.style = 'border: none; background: none; color: #888; cursor: pointer;';
+          removeBtn.onclick = () => removeSubtask(index);
+
+          li.appendChild(link);
+          li.appendChild(removeBtn);
+          list.appendChild(li);
+        });
+      }
+
+      function getCardLabel (url) {
+        const parts = url.split('/');
+        const id = parts[parts.length - 1] || parts[parts.length - 2];
+        return `Card ${id}`;
+      }
+
+      function addSubtask () {
+        const input = document.getElementById('subtask-url');
+        const url = input.value.trim();
         if (!url) return;
 
         t.get('card', 'shared', 'subtasks', [])
           .then(subtasks => {
-            subtasks.push(url);
+            if (subtasks.includes(url)) return subtasks;
+            return [...subtasks, url];
+          })
+          .then(updated => t.set('card', 'shared', 'subtasks', updated))
+          .then(() => {
+            input.value = '';
+            return t.get('card', 'shared', 'subtasks', []);
+          })
+          .then(renderSubtasks);
+      }
+
+      function removeSubtask (index) {
+        t.get('card', 'shared', 'subtasks', [])
+          .then(subtasks => {
+            subtasks.splice(index, 1);
             return t.set('card', 'shared', 'subtasks', subtasks);
           })
-          .then(() => t.closePopup());
+          .then(() => t.get('card', 'shared', 'subtasks', []))
+          .then(renderSubtasks);
       }
+
+      t.get('card', 'shared', 'subtasks', []).then(renderSubtasks);
     </script>
   </body>
 </html>
