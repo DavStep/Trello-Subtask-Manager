@@ -2,13 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Add Subtasks</title>
+    <title>Subtasks</title>
     <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css" />
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
   </head>
   <body style="margin: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
-    <h3 style="margin-top: 0;">Manage Subtasks</h3>
+    <h3 style="margin-top: 0;">Linked Subtasks</h3>
 
     <ul id="subtask-list" style="list-style: none; padding-left: 0; margin-bottom: 16px;"></ul>
 
@@ -20,11 +20,7 @@
         placeholder="Paste Trello card URL"
         style="flex-grow: 1; padding: 6px 8px;"
       />
-      <button
-        class="mod-primary"
-        onclick="addSubtask()"
-        style="padding: 6px 12px;"
-      >
+      <button class="mod-primary" onclick="addSubtask()" style="padding: 6px 12px;">
         Add
       </button>
     </div>
@@ -33,21 +29,40 @@
       const t = TrelloPowerUp.iframe();
       const list = document.getElementById('subtask-list');
 
-      function renderSubtasks (urls) {
+      async function fetchCardTitle(url) {
+        try {
+          const shortLink = extractShortLink(url);
+          const res = await fetch(`https://trello.com/1/cards/${shortLink}`);
+          const data = await res.json();
+          return data.name || `Card ${shortLink}`;
+        } catch {
+          return `Card ${extractShortLink(url)}`;
+        }
+      }
+
+      function extractShortLink(url) {
+        const match = url.match(/trello\.com\/c\/([a-zA-Z0-9]+)/);
+        return match ? match[1] : '';
+      }
+
+      async function renderSubtasks(urls) {
         list.innerHTML = '';
         if (!urls.length) {
-          list.innerHTML = '<li style="color: #888;">No subtasks linked.</li>';
+          list.innerHTML = `<li style="color: #888;">No subtasks yet.</li>`;
           return;
         }
 
-        urls.forEach((url, index) => {
+        for (let i = 0; i < urls.length; i++) {
+          const url = urls[i];
+          const title = await fetchCardTitle(url);
+
           const li = document.createElement('li');
           li.style = 'display: flex; align-items: center; margin-bottom: 8px; gap: 8px;';
 
           const link = document.createElement('a');
           link.href = url;
           link.target = '_blank';
-          link.textContent = getCardLabel(url);
+          link.textContent = title;
           link.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
           link.onmouseover = () => link.style.textDecoration = 'underline';
           link.onmouseout = () => link.style.textDecoration = 'none';
@@ -56,31 +71,26 @@
           removeBtn.textContent = '✕';
           removeBtn.title = 'Remove';
           removeBtn.style = 'border: none; background: none; color: #888; cursor: pointer;';
-          removeBtn.onclick = () => removeSubtask(index);
+          removeBtn.onclick = () => removeSubtask(i);
 
           li.appendChild(link);
           li.appendChild(removeBtn);
           list.appendChild(li);
-        });
+        }
       }
 
-      function getCardLabel (url) {
-        const parts = url.split('/');
-        const id = parts[parts.length - 1] || parts[parts.length - 2];
-        return `Card ${id}`;
-      }
-
-      function addSubtask () {
+      function addSubtask() {
         const input = document.getElementById('subtask-url');
         const url = input.value.trim();
         if (!url) return;
 
         t.get('card', 'shared', 'subtasks', [])
           .then(subtasks => {
-            if (subtasks.includes(url)) return subtasks;
-            return [...subtasks, url];
+            if (!subtasks.includes(url)) {
+              subtasks.push(url);
+            }
+            return t.set('card', 'shared', 'subtasks', subtasks);
           })
-          .then(updated => t.set('card', 'shared', 'subtasks', updated))
           .then(() => {
             input.value = '';
             return t.get('card', 'shared', 'subtasks', []);
@@ -88,7 +98,7 @@
           .then(renderSubtasks);
       }
 
-      function removeSubtask (index) {
+      function removeSubtask(index) {
         t.get('card', 'shared', 'subtasks', [])
           .then(subtasks => {
             subtasks.splice(index, 1);
