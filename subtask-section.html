@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  </head>
+  <body style="margin: 10px;">
+    <ul id="subtask-list" style="padding-left: 18px;"></ul>
+
+    <script>
+      const t = TrelloPowerUp.iframe();
+      const list = document.getElementById('subtask-list');
+
+      t.get('card', 'shared', 'subtasks', []).then(urls => {
+        if (!urls.length) {
+          list.innerHTML = '<li>No subtasks linked.</li>';
+          return;
+        }
+
+        urls.forEach(url => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = url;
+          a.textContent = url;
+          a.target = '_blank';
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+      });
+    </script>
+  </body>
+</html>
