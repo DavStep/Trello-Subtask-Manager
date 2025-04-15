@@ -1,14 +1,27 @@
-<input type="url" id="subtask-url" placeholder="paste Trello card URL" />
-<button onclick="saveSubtask()">Save</button>
-<script>
-function saveSubtask() {
-  const url = document.getElementById('subtask-url').value;
-  const t = TrelloPowerUp.iframe();
-  t.get('card', 'shared', 'subtasks', [])
-    .then(subtasks => {
-      subtasks.push(url);
-      return t.set('card', 'shared', 'subtasks', subtasks);
-    })
-    .then(() => t.closePopup());
-}
-</script>
+<!DOCTYPE html>
+<html>
+  <body>
+    <input type="url" id="subtask-url" placeholder="Paste Trello card URL" />
+    <button onclick="saveSubtask()">Save</button>
+
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <script>
+      const t = TrelloPowerUp.iframe();
+
+      function saveSubtask () {
+        const input = document.getElementById('subtask-url');
+        const url = input.value?.trim();
+        if (!url) return;
+
+        t.get('card', 'shared', 'subtasks', [])
+          .then(function (subtasks) {
+            subtasks.push(url);
+            return t.set('card', 'shared', 'subtasks', subtasks);
+          })
+          .then(function () {
+            t.closePopup();
+          });
+      }
+    </script>
+  </body>
+</html>
