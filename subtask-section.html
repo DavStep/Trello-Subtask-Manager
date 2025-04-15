@@ -1,31 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  </head>
-  <body style="margin: 10px;">
-    <ul id="subtask-list" style="padding-left: 18px;"></ul>
+<head>
+  <meta charset="utf-8" />
+  <title>Subtasks</title>
+  <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body style="margin: 16px; font-family: 'Helvetica Neue', Arial, sans-serif;">
 
-    <script>
-      const t = TrelloPowerUp.iframe();
-      const list = document.getElementById('subtask-list');
+  <h3 style="margin-top: 0;">Linked Subtasks</h3>
 
-      t.get('card', 'shared', 'subtasks', []).then(urls => {
-        if (!urls.length) {
-          list.innerHTML = '<li>No subtasks linked.</li>';
-          return;
-        }
+  <ul id="subtask-list" style="list-style-type: none; padding-left: 0; margin-top: 8px;"></ul>
 
-        urls.forEach(url => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.href = url;
-          a.textContent = url;
-          a.target = '_blank';
-          li.appendChild(a);
-          list.appendChild(li);
-        });
+  <script>
+    const t = TrelloPowerUp.iframe();
+    const list = document.getElementById('subtask-list');
+
+    t.get('card', 'shared', 'subtasks', []).then(urls => {
+      if (!urls.length) {
+        list.innerHTML = `<li style="color: #888;">No subtasks linked yet.</li>`;
+        return;
+      }
+
+      urls.forEach(url => {
+        const li = document.createElement('li');
+        li.style = 'margin-bottom: 8px;';
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.textContent = getPrettyTitleFromURL(url);
+        a.target = '_blank';
+        a.style = 'color: #0079bf; text-decoration: none; font-weight: 500;';
+
+        a.onmouseover = () => a.style.textDecoration = 'underline';
+        a.onmouseout = () => a.style.textDecoration = 'none';
+
+        li.appendChild(a);
+        list.appendChild(li);
       });
-    </script>
-  </body>
+    });
+
+    // fallback name until card name fetching is implemented
+    function getPrettyTitleFromURL (url) {
+      const parts = url.split('/');
+      return `Card ${parts[parts.length - 1]}`;
+    }
+  </script>
+</body>
 </html>
