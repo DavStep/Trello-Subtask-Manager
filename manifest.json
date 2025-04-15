@@ -13,17 +13,19 @@
         "callback": "renderSubtasks"
       }
     ],
-    "card-detail-sections": {
-      "section": "subtask-section",
-      "claimed": true,
-      "title": "Subtasks",
-      "icon": "https://trello-subtask-manager.netlify.app/logo.png",
-      "content": {
-        "type": "iframe",
-        "url": "subtask-section.html",
-        "height": 150
+    "card-detail-sections": [
+      {
+        "section": "subtask-section",
+        "claimed": true,
+        "title": "Subtasks",
+        "icon": "https://trello-subtask-manager.netlify.app/logo.png",
+        "content": {
+          "type": "iframe",
+          "url": "subtask-section.html",
+          "height": 150
+        }
       }
-    }
+    ]
   },
   "connectors": {
     "iframe": {
