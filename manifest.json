@@ -16,9 +16,10 @@
   },
   "connectors": {
     "iframe": {
-      "url": "https://trello-subtask-manager.netlify.app",
-      "height": 200
+      "url": "https://trello-subtask-manager.netlify.app"
     }
   },
-  "authorization": { "type": "none" }
+  "authorization": {
+    "type": "none"
+  }
 }
