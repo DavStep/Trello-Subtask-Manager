@@ -1,0 +1,19 @@
+{
+  "name": "Subtasks Manager",
+  "id": "subtasks-manager",
+  "description": "Manage subtasks via linked cards.",
+  "author": "you",
+  "capabilities": {
+    "card-buttons": [
+      {
+        "text": "Open Subtasks",
+        "callback": "openSubtasks"
+      }
+    ]
+  },
+  "connectors": {
+    "iframe": {
+      "url": "./"
+    }
+  }
+}
